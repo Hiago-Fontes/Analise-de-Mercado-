@@ -12,7 +12,12 @@ from analysis.scoring import build_recommendations
 from analysis.report import generate_monthly_report
 from assets_config import CATEGORIAS, TODOS_ATIVOS
 
-app = Flask(__name__)
+# Configurar caminhos corretos para templates e static
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BACKEND_DIR, 'templates')
+STATIC_DIR = os.path.join(BACKEND_DIR, 'static')
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR, static_folder=STATIC_DIR, static_url_path='/static')
 app.secret_key = os.environ.get("APP_SECRET", "dev-secret")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "market.sqlite")
@@ -78,9 +83,6 @@ def analyze():
         traceback.print_exc()
         flash(f"Erro na análise: {e}", "danger")
         return redirect(url_for("index"))
-    except Exception as e:
-        flash(f"Erro na análise: {e}", "danger")
-        return redirect(url_for("index"))
 
 @app.get("/recommendations")
 def recommendations():
@@ -120,6 +122,14 @@ def report():
     except Exception as e:
         flash(f"Erro ao gerar relatório: {e}", "danger")
         return redirect(url_for("index"))
+
+@app.errorhandler(500)
+def handle_500(e):
+    """Tratador de erros 500"""
+    print(f"ERRO 500: {e}")
+    import traceback
+    traceback.print_exc()
+    return f"Erro interno do servidor: {e}", 500
 
 if __name__ == "__main__":
     # Executa o app de desenvolvimento

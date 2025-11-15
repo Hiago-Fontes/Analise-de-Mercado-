@@ -40,7 +40,8 @@ def build_recommendations(db_path: str):
         # Penaliza risco em regime risk-off
         if regime == "risk-off":
             score *= 0.9 if vol_n > 0.25 else 1.05
-        rows.append((ticker, score, vol, mdd, dy, datetime.utcnow().isoformat(timespec="seconds")))
+        # Salvar valores normalizados (nunca None)
+        rows.append((ticker, score, vol_n if pd.notna(vol) else None, mdd if pd.notna(mdd) else None, dy_n, datetime.utcnow().isoformat(timespec="seconds")))
 
     cur.execute("DELETE FROM recommendations")
     cur.executemany(
