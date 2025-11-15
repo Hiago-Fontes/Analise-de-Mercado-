@@ -72,7 +72,7 @@ def analyze():
         return redirect(url_for("index"))
 
 @app.get("/recommendations")
-@app.get("/recommendations")
+def recommendations():
     """Mostrar recomendações"""
     try:
         conn = get_db(DB_PATH)
