@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template, request, redirect, url_for, flash, has_request_context
+from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
 
 # Adiciona o diretório raiz do projeto ao path do Python
@@ -18,11 +18,6 @@ except ImportError as e:
 
 app = Flask(__name__, template_folder=os.path.join(PROJECT_ROOT, "src/app/templates"), static_folder=os.path.join(PROJECT_ROOT, "src/app/static"))
 app.secret_key = os.environ.get("APP_SECRET", "dev-secret-key")
-
-# Injetar has_request_context no contexto do Jinja2
-@app.context_processor
-def inject_has_request_context():
-    return dict(has_request_context=has_request_context)
 
 # Sempre usar a pasta 'data' do projeto (nunca /tmp)
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
@@ -77,7 +72,7 @@ def analyze():
         return redirect(url_for("index"))
 
 @app.get("/recommendations")
-def recommendations():
+@app.get("/recommendations")
     """Mostrar recomendações"""
     try:
         conn = get_db(DB_PATH)
@@ -92,7 +87,9 @@ def recommendations():
             """
         ).fetchall()
         conn.close()
-        return render_template("recommendations.html", rows=recs)
+        # Converter sqlite3.Row para dict para compatibilidade com Jinja2
+        rows_dict = [dict(r) for r in recs]
+        return render_template("recommendations.html", rows=rows_dict)
     except Exception as e:
         print(f"ERRO ao buscar recomendações: {e}")
         import traceback

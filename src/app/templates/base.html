@@ -16,18 +16,6 @@
     </nav>
   </header>
 
-  {% if has_request_context() %}
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="flash">
-      {% for category, message in messages %}
-        <div class="flash-item {{ category }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-  {% endwith %}
-  {% endif %}
-
   <main>
     {% block content %}{% endblock %}
   </main>
