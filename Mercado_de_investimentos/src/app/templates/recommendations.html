@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2>⭐ Recomendações de Investimento</h2>
+  <p style="color: #9aa4b2; margin-top: 0;">Classificadas por menor risco e melhor retorno esperado</p>
+  
+  {% if rows %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th>Nome</th>
+          <th>Score (↑ melhor)</th>
+          <th>Volatilidade</th>
+          <th>Max Drawdown</th>
+          <th>Dividend Yield</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr class="{% if loop.index0 < 5 %}recommended{% endif %}">
+          <td><strong>{{ r['ticker'] }}</strong></td>
+          <td>{{ r['name'] }}</td>
+          <td>{{ '%.4f'|format(r['score']) }}</td>
+          <td><span class="badge">{{ '%.2f'|format(r['volatility']*100) }}%</span></td>
+          <td><span class="badge negative">{{ '%.2f'|format(r['max_drawdown']*100) }}%</span></td>
+          <td><span class="badge positive">{{ '%.2f'|format(r['dividend_yield']*100) }}%</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">Nenhuma recomendação disponível. Execute uma análise primeiro!</p>
+  {% endif %}
+</section>
+{% endblock %}
