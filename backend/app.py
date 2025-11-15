@@ -52,7 +52,32 @@ def analyze():
         ingest_latest(DB_PATH, tickers)
         # Gera recomendações
         build_recommendations(DB_PATH)
-        return redirect(url_for("recommendations"))
+        
+        # Buscar dados dos ativos analisados
+        conn = get_db(DB_PATH)
+        cur = conn.cursor()
+        placeholders = ','.join(['?' for _ in tickers])
+        assets_data = cur.execute(
+            f"""
+            SELECT r.ticker, r.score, r.volatility, r.max_drawdown, r.dividend_yield, a.name
+            FROM recommendations r
+            JOIN assets a ON a.ticker = r.ticker
+            WHERE r.ticker IN ({placeholders})
+            ORDER BY r.score DESC
+            """,
+            tickers
+        ).fetchall()
+        conn.close()
+        
+        # Converter sqlite3.Row para dict
+        rows_dict = [dict(r) for r in assets_data]
+        return render_template("analysis.html", rows=rows_dict, tickers_count=len(tickers))
+    except Exception as e:
+        print(f"ERRO ao analisar: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f"Erro na análise: {e}", "danger")
+        return redirect(url_for("index"))
     except Exception as e:
         flash(f"Erro na análise: {e}", "danger")
         return redirect(url_for("index"))
