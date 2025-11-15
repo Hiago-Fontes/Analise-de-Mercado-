@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2>🎯 Executar Análise</h2>
+  <form action="/analyze" method="post" class="form">
+    <label for="tickers">Tickers (separados por vírgula)</label>
+    <input 
+      type="text" 
+      id="tickers" 
+      name="tickers" 
+      placeholder="Ex.: SPY, AAPL, VNQ ou PETR4.SA, VALE3.SA, KNRI11.SA"
+      required />
+    <button type="submit">🔍 Analisar e Recomendar</button>
+  </form>
+  <p class="hint">💡 Dica: Sem internet, o sistema usa dados de amostra (SPY, AAPL, VNQ).</p>
+  
+  <div class="info-box">
+    <h3>ℹ️ Como usar</h3>
+    <ul>
+      <li>Informe um ou mais tickers de ações/ETFs ou FIIs</li>
+      <li>O sistema irá calcular risco, volatilidade e dividend yield</li>
+      <li>Você receberá um ranking de menor para maior risco</li>
+      <li>Acesse o relatório mensal para ver lucros e perdas</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}

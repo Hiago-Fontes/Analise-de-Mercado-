@@ -1,0 +1,179 @@
+📈 MERCADO DE INVESTIMENTOS
+🚀 Projeto Full-Stack: Python + HTML/CSS + SQLite
+
+═══════════════════════════════════════════════════════════════════
+
+📁 ESTRUTURA DO PROJETO (Reorganizado e Profissional)
+
+Mercado_de_investimentos/
+│
+├─ 📖 DOCUMENTAÇÃO
+│  ├─ README.md ........................ Guia completo (LEIA PRIMEIRO)
+│  ├─ INDICE.md ........................ Índice de navegação rápida
+│  ├─ ESTRUTURA.md ..................... Arquitetura técnica
+│  ├─ DEPLOY_RAPIDO.md ................. Deploy em 5 minutos
+│  └─ README_DEPLOY.md ................. Guia completo deployment
+│
+├─ 🚀 PARA EXECUTAR
+│  ├─ run.py ........................... ⭐ ARQUIVO PRINCIPAL - EXECUTE ISTO
+│  ├─ setup_local.py ................... Setup automático (venv + deps)
+│  ├─ requirements.txt ................. Dependências Python
+│  ├─ Procfile ......................... Config Render/Heroku
+│  └─ render.yaml ...................... Config específica Render
+│
+├─ 📂 src/ ............................. CÓDIGO-FONTE (Organizado)
+│  │
+│  ├─ 📂 app/ .......................... INTERFACE DO USUÁRIO
+│  │  ├─ 📂 templates/ ................. Templates HTML (Jinja2)
+│  │  │  ├─ base.html ................. Layout base
+│  │  │  ├─ index.html ................ Página inicial
+│  │  │  ├─ recommendations.html ....... Recomendações
+│  │  │  └─ report.html ............... Relatório mensal
+│  │  │
+│  │  └─ 📂 static/ ................... Arquivos estáticos
+│  │     ├─ 📂 css/
+│  │     │  └─ styles.css ............ Estilos (Dark Theme)
+│  │     └─ 📂 js/
+│  │        └─ (Scripts futuros)
+│  │
+│  └─ 📂 core/ ......................... LÓGICA DE NEGÓCIO
+│     │
+│     ├─ 📂 database/ ................. CAMADA DE DADOS
+│     │  ├─ db.py .................... SQLite (schema + conexões)
+│     │  └─ __init__.py
+│     │
+│     └─ 📂 analysis/ ................. MOTOR DE ANÁLISE
+│        ├─ indicators.py ............ Volatilidade, drawdown, yield
+│        ├─ data_sources.py .......... Coleta yfinance + CSV
+│        ├─ scoring.py .............. Pontuação por risco
+│        ├─ report.py ............... Relatórios HTML mensais
+│        └─ __init__.py
+│
+├─ 📂 data/ ............................ DADOS DA APLICAÇÃO
+│  ├─ sample_tickers.csv ............. Ativos de amostra
+│  ├─ sample_prices.csv .............. Preços históricos (1 ano)
+│  └─ market.sqlite .................. ⚙️ Banco SQLite (gerado)
+│
+├─ 📂 docs/ ............................ DOCUMENTAÇÃO TÉCNICA
+│  └─ (Adicionar docs futuras)
+│
+├─ 📂 scripts/ ......................... SCRIPTS AUXILIARES
+│  └─ (Scripts de setup/maintenance)
+│
+├─ 📂 config/ .......................... CONFIGURAÇÕES
+│  └─ (Variáveis de ambiente)
+│
+├─ 📂 tests/ ........................... TESTES UNITÁRIOS
+│  └─ (Testes futuros)
+│
+├─ .gitignore .......................... Arquivos ignorados Git
+├─ .venv/ ............................. Ambiente virtual Python
+│
+└─ 📝 Git/Deploy
+   └─ (Configurações GitHub)
+
+═══════════════════════════════════════════════════════════════════
+
+🎯 COMO COMEÇAR
+
+1. Instale as dependências (automático):
+   $ python setup_local.py
+
+2. Ou instale manualmente:
+   $ pip install -r requirements.txt
+
+3. Inicie a aplicação:
+   $ python run.py
+
+4. Acesse no navegador:
+   http://127.0.0.1:5000
+
+═══════════════════════════════════════════════════════════════════
+
+📚 DOCUMENTAÇÃO (Leia na Ordem)
+
+1️⃣  README.md ..................... Visão geral e quick start
+2️⃣  ESTRUTURA.md .................. Arquitetura e como expandir
+3️⃣  INDICE.md ..................... Índice de navegação rápida
+4️⃣  DEPLOY_RAPIDO.md .............. Deploy em 5 minutos (Render)
+5️⃣  README_DEPLOY.md .............. Guia completo deployment
+
+═══════════════════════════════════════════════════════════════════
+
+🔄 FLUXO DE DADOS
+
+Entrada de Tickers
+        ↓
+[data_sources.py] → Busca preços (yfinance ou CSV local)
+        ↓
+[database/db.py] → Armazena em SQLite
+        ↓
+[indicators.py] → Calcula volatilidade, drawdown, dividend
+        ↓
+[scoring.py] → Cria ranking por score de risco
+        ↓
+[Flask Routes] → Exibe em templates HTML
+        ↓
+[report.py] → Gera relatório mensal em HTML
+
+═══════════════════════════════════════════════════════════════════
+
+💡 RECURSOS PRINCIPAIS
+
+✅ Análise de Risco
+   - Volatilidade anualizada
+   - Drawdown máximo
+   - Dividend yield
+
+✅ Recomendações Inteligentes
+   - Score baseado em menor risco
+   - Regime de mercado (risk-on/off)
+   - Ranking priorizado
+
+✅ Relatórios Mensais
+   - Lucros e perdas
+   - Dividendos
+   - Análise de drawdowns
+   - Exportação HTML
+
+✅ Dados Globais
+   - Ações EUA (SPY, AAPL, etc)
+   - Ações Brasil (PETR4.SA, VALE3.SA)
+   - FIIs Imobiliários
+
+✅ Funciona Offline
+   - SQLite local
+   - Dados de amostra CSV
+   - Sem internet? Sem problema!
+
+═══════════════════════════════════════════════════════════════════
+
+🌐 DEPLOY GRATUITO (5 MINUTOS)
+
+1. Envie para GitHub (git push)
+2. Acesse render.com
+3. Conecte o repositório
+4. Deploy automático!
+
+Veja DEPLOY_RAPIDO.md para detalhes.
+
+═══════════════════════════════════════════════════════════════════
+
+🛠️ TECNOLOGIAS
+
+Backend:      Python 3.10+, Flask
+Frontend:     HTML5, CSS3 (Dark Theme)
+Database:     SQLite
+Data:         yfinance + CSV offline
+Deploy:       Render, Railway, PythonAnywhere
+
+═══════════════════════════════════════════════════════════════════
+
+👤 INFORMAÇÕES
+
+Versão:      1.0
+Status:      ✅ Pronto para produção
+Data:        14 de novembro de 2025
+Licença:     MIT (livre para usar)
+
+═══════════════════════════════════════════════════════════════════

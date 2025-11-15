@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2>Executar Análise</h2>
+  <form action="/analyze" method="post" class="form">
+    <label for="tickers">Tickers (separados por vírgula)</label>
+    <input type="text" id="tickers" name="tickers" placeholder="Ex.: SPY, AAPL, VNQ ou PETR4.SA, VALE3.SA, KNRI11.SA" />
+    <button type="submit">Analisar e Recomendar</button>
+  </form>
+  <p class="hint">Sem internet, o sistema usa os dados de amostra (SPY, AAPL, VNQ).</p>
+</section>
+{% endblock %}

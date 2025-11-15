@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2>Relatório Mensal</h2>
+  <form action="/report" method="get" class="form">
+    <label for="month">Mês (YYYY-MM)</label>
+    <input type="text" id="month" name="month" placeholder="{{ summary['month'] if summary else '' }}" />
+    <button type="submit">Gerar</button>
+  </form>
+
+  {% if summary %}
+  <div class="card">
+    <p><strong>Mês:</strong> {{ summary['month'] }}</p>
+    <p><strong>Carteira:</strong> {{ ', '.join(summary['selected']) }}</p>
+    <p><strong>Retorno:</strong> {{ '%.2f'|format(summary['portfolio_return']*100) }}%</p>
+    <p><strong>Dividendos:</strong> {{ '%.4f'|format(summary['portfolio_dividends']) }}</p>
+    <p><strong>Drawdown médio:</strong> {{ '%.2f'|format(summary['avg_drawdown']*100) }}%</p>
+  </div>
+  <p>Arquivo HTML completo salvo em <code>reports/</code>.</p>
+  {% endif %}
+</section>
+{% endblock %}
