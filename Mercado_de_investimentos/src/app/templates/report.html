@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<section>
+  <h2>📊 Relatório Mensal</h2>
+  
+  <form action="/report" method="get" class="form">
+    <label for="month">Selecione o mês (YYYY-MM)</label>
+    <input 
+      type="month" 
+      id="month" 
+      name="month"
+      value="{{ summary['month'] if summary else '' }}" />
+    <button type="submit">📈 Gerar Relatório</button>
+  </form>
+
+  {% if summary %}
+  <div class="report-card">
+    <div class="report-header">
+      <h3>Período: {{ summary['month'] }}</h3>
+    </div>
+    
+    <div class="metrics-grid">
+      <div class="metric">
+        <span class="metric-label">Carteira Selecionada</span>
+        <span class="metric-value">{{ ', '.join(summary['selected']) or 'N/A' }}</span>
+      </div>
+      
+      <div class="metric">
+        <span class="metric-label">Retorno da Carteira</span>
+        <span class="metric-value {% if summary['portfolio_return'] >= 0 %}positive{% else %}negative{% endif %}">
+          {{ '%.2f'|format(summary['portfolio_return']*100) }}%
+        </span>
+      </div>
+      
+      <div class="metric">
+        <span class="metric-label">Dividendos Estimados</span>
+        <span class="metric-value">{{ '%.4f'|format(summary['portfolio_dividends']) }}</span>
+      </div>
+      
+      <div class="metric">
+        <span class="metric-label">Drawdown Médio</span>
+        <span class="metric-value negative">{{ '%.2f'|format(summary['avg_drawdown']*100) }}%</span>
+      </div>
+    </div>
+    
+    <p class="hint">📌 O relatório completo foi salvo em <code>reports/report_{{ summary['month'] }}.html</code></p>
+  </div>
+  {% else %}
+  <p class="empty-state">Selecione um mês e clique em "Gerar Relatório" para visualizar os dados.</p>
+  {% endif %}
+</section>
+{% endblock %}

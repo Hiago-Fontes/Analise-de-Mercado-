@@ -1,0 +1,13 @@
+# Render.com configuration for deployment
+# Place this file as render.yaml in the root directory
+
+services:
+  - type: web
+    name: mercado-investimentos
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 1 -b 0.0.0.0:$PORT backend.app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10
