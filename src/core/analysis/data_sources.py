@@ -5,7 +5,9 @@ import numpy as np
 from datetime import datetime, timedelta
 
 # Adiciona o diretório raiz do projeto ao path do Python
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from src.core.database.db import get_db
 
@@ -14,7 +16,13 @@ try:
 except Exception:
     yf = None
 
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data"))
+# DATA_DIR pode ser /tmp no Render ou data/ localmente
+if os.path.exists("/tmp"):
+    DATA_DIR = "/tmp"
+else:
+    DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+    
+os.makedirs(DATA_DIR, exist_ok=True)
 
 SAMPLE_TICKERS = ["SPY", "AAPL", "VNQ"]
 
