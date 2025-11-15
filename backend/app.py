@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime
 import os
 import sys
@@ -10,6 +10,7 @@ from db.db import init_db, get_db
 from analysis.data_sources import ensure_seed_data, ingest_latest
 from analysis.scoring import build_recommendations
 from analysis.report import generate_monthly_report
+from assets_config import CATEGORIAS, TODOS_ATIVOS
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET", "dev-secret")
@@ -27,6 +28,16 @@ def setup():
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.get("/api/assets")
+def api_assets():
+    """API para obter lista de ativos por categoria"""
+    return jsonify({
+        "categorias": list(CATEGORIAS.keys()),
+        "ativos": {cat: list(ativos.keys()) for cat, ativos in CATEGORIAS.items()},
+        "detalhes": {ticker: {"nome": info["nome"], "setor": info["setor"], "tipo": info["tipo"]} 
+                     for ticker, info in TODOS_ATIVOS.items()}
+    })
 
 @app.post("/analyze")
 def analyze():
@@ -48,18 +59,28 @@ def analyze():
 
 @app.get("/recommendations")
 def recommendations():
-    conn = get_db(DB_PATH)
-    cur = conn.cursor()
-    recs = cur.execute(
-        """
-        SELECT r.ticker, r.score, r.volatility, r.max_drawdown, r.dividend_yield, a.name
-        FROM recommendations r
-        JOIN assets a ON a.ticker = r.ticker
-        ORDER BY r.score DESC
-        LIMIT 50
-        """
-    ).fetchall()
-    return render_template("recommendations.html", rows=recs)
+    try:
+        conn = get_db(DB_PATH)
+        cur = conn.cursor()
+        recs = cur.execute(
+            """
+            SELECT r.ticker, r.score, r.volatility, r.max_drawdown, r.dividend_yield, a.name
+            FROM recommendations r
+            JOIN assets a ON a.ticker = r.ticker
+            ORDER BY r.score DESC
+            LIMIT 50
+            """
+        ).fetchall()
+        conn.close()
+        # Converter sqlite3.Row para dict
+        rows_dict = [dict(r) for r in recs]
+        return render_template("recommendations.html", rows=rows_dict)
+    except Exception as e:
+        print(f"ERRO ao buscar recomendações: {e}")
+        import traceback
+        traceback.print_exc()
+        flash(f"Erro ao buscar recomendações: {e}", "danger")
+        return redirect(url_for("index"))
 
 @app.get("/report")
 def report():

@@ -3,10 +3,244 @@
 <section>
   <h2>Executar Análise</h2>
   <form action="/analyze" method="post" class="form">
-    <label for="tickers">Tickers (separados por vírgula)</label>
-    <input type="text" id="tickers" name="tickers" placeholder="Ex.: SPY, AAPL, VNQ ou PETR4.SA, VALE3.SA, KNRI11.SA" />
-    <button type="submit">Analisar e Recomendar</button>
+    <div class="form-group">
+      <label for="categoria">Categoria de Ativos</label>
+      <select id="categoria" class="form-select">
+        <option value="">-- Selecionar Ativos por Categoria --</option>
+        <option value="Ações Brasil">Ações Brasil</option>
+        <option value="Imóveis (FIIs)">Imóveis (FIIs)</option>
+        <option value="Ações EUA">Ações EUA</option>
+        <option value="ETFs e REITs EUA">ETFs e REITs EUA (Imóveis Internacionais)</option>
+        <option value="Fintechs">Fintechs Brasileiras</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="ativos">Ativos Disponíveis</label>
+      <select id="ativos" multiple size="10" class="form-select">
+        <!-- Preenchido por JavaScript -->
+      </select>
+      <small>Segure Ctrl/Cmd para selecionar múltiplos ativos</small>
+    </div>
+
+    <div class="form-group">
+      <label for="tickers">Ou Digite Manualmente (separados por vírgula)</label>
+      <input type="text" id="tickers" name="tickers" placeholder="Ex.: SPY, AAPL, VNQ ou PETR4.SA, VALE3.SA, KNRI11.SA" />
+      <small>Você pode combinar com os ativos selecionados acima</small>
+    </div>
+
+    <button type="submit" class="btn-primary">Analisar e Recomendar</button>
   </form>
-  <p class="hint">Sem internet, o sistema usa os dados de amostra (SPY, AAPL, VNQ).</p>
+
+  <div class="info-box">
+    <h3>📊 Opções de Análise</h3>
+    <ul>
+      <li><strong>Ações Brasil:</strong> Blue chips, bancos, empresas de diversos setores listadas na B3</li>
+      <li><strong>Imóveis (FIIs):</strong> Fundos Imobiliários - investimento em shopping, comercial, logística e residencial</li>
+      <li><strong>Ações EUA:</strong> Grandes empresas americanas (tech, financeiro, saúde, energia)</li>
+      <li><strong>ETFs e REITs:</strong> Fundos de índices, REITs (Real Estate Investment Trusts) de imóveis americanos</li>
+      <li><strong>Fintechs:</strong> Bancos digitais e empresas de tecnologia financeira</li>
+    </ul>
+    <p class="hint">Sem internet, o sistema usa os dados de amostra. Selecione ao menos 1 ativo.</p>
+  </div>
 </section>
+
+<script>
+// Dados de ativos por categoria
+const ativosData = {
+  "Ações Brasil": {
+    "PETR4.SA": "Petrobras PN",
+    "VALE3.SA": "Vale ON",
+    "ITUB4.SA": "Itaú Unibanco PN",
+    "BBDC4.SA": "Bradesco PN",
+    "BBAS3.SA": "Banco do Brasil ON",
+    "SANB11.SA": "Santander Brasil",
+    "CIEL3.SA": "Cielo ON",
+    "MGLU3.SA": "Magazine Luiza ON",
+    "B3SA3.SA": "B3 ON",
+    "RENT3.SA": "Localiza ON",
+    "EMBR3.SA": "Embraer ON",
+    "WEGE3.SA": "WEG ON",
+    "JBSS3.SA": "JBS ON",
+    "SUZB3.SA": "Suzano ON",
+    "GOLL4.SA": "Gol PN",
+    "USIM5.SA": "Usiminas PNA",
+    "CSNA3.SA": "CSN ON",
+    "ECOR3.SA": "Ecorodovias ON",
+    "GGBR4.SA": "Gerdau PN",
+    "KLBN11.SA": "Klabin UNT"
+  },
+  "Imóveis (FIIs)": {
+    "KNRI11.SA": "Kinea Rendimentos",
+    "MALL11.SA": "Malezas",
+    "BRML11.SA": "BR Malls",
+    "CXSE11.SA": "Complexo Executivo",
+    "HGLG11.SA": "Hedge Imóveis",
+    "XPML11.SA": "XP Log",
+    "MXRF11.SA": "Maxi Renda Fixa",
+    "RBRR11.SA": "RBR Realty",
+    "VILG11.SA": "Village Offices",
+    "PATB11.SA": "Pátria Logística",
+    "SAGG11.SA": "Sagen Desenvolvimento",
+    "BBPO11.SA": "BB Progressivo",
+    "IRDM11.SA": "Iridium Logística",
+    "CPFF11.SA": "C&P Logística",
+    "HAGG11.SA": "Hagg Logística"
+  },
+  "Ações EUA": {
+    "AAPL": "Apple Inc",
+    "MSFT": "Microsoft",
+    "GOOGL": "Alphabet (Google)",
+    "AMZN": "Amazon",
+    "TSLA": "Tesla",
+    "META": "Meta Platforms",
+    "NVDA": "NVIDIA",
+    "JPM": "JPMorgan Chase",
+    "V": "Visa Inc",
+    "MA": "Mastercard",
+    "PG": "Procter & Gamble",
+    "KO": "Coca-Cola",
+    "JNJ": "Johnson & Johnson",
+    "MCD": "McDonald's",
+    "WMT": "Walmart",
+    "XOM": "Exxon Mobil",
+    "CVX": "Chevron",
+    "BA": "Boeing",
+    "CAT": "Caterpillar",
+    "IBM": "IBM"
+  },
+  "ETFs e REITs EUA": {
+    "VTI": "Vanguard Total Market",
+    "VOO": "Vanguard S&P 500",
+    "VEA": "Vanguard FTSE Developed",
+    "VWO": "Vanguard FTSE Emerging",
+    "BND": "Vanguard Bond Market",
+    "VNQ": "Vanguard Real Estate (REIT)",
+    "SCHH": "Schwab US REIT",
+    "XLRE": "Real Estate Select Sector",
+    "IYR": "iShares US Real Estate",
+    "QQQ": "Invesco QQQ (Nasdaq-100)",
+    "XLK": "Technology Sector",
+    "XLF": "Financial Sector",
+    "XLE": "Energy Sector",
+    "XLV": "Health Care Sector"
+  },
+  "Fintechs": {
+    "INTER3.SA": "Banco Inter ON"
+  }
+};
+
+// Atualizar select de ativos quando categoria mudar
+document.getElementById('categoria').addEventListener('change', function() {
+  const categoria = this.value;
+  const ativosSelect = document.getElementById('ativos');
+  ativosSelect.innerHTML = '';
+  
+  if (categoria && ativosData[categoria]) {
+    Object.entries(ativosData[categoria]).forEach(([ticker, nome]) => {
+      const option = document.createElement('option');
+      option.value = ticker;
+      option.textContent = `${ticker} - ${nome}`;
+      ativosSelect.appendChild(option);
+    });
+  }
+});
+
+// Ao enviar o formulário, combinar ativos selecionados com tickers digitados
+document.querySelector('.form').addEventListener('submit', function(e) {
+  const ativosSelect = document.getElementById('ativos');
+  const tickersInput = document.getElementById('tickers');
+  
+  // Coletar tickers selecionados
+  const selecionados = Array.from(ativosSelect.selectedOptions).map(opt => opt.value);
+  
+  // Coletar tickers digitados
+  const digitados = tickersInput.value.split(',').map(t => t.trim()).filter(t => t);
+  
+  // Combinar
+  const todos = [...selecionados, ...digitados];
+  
+  if (todos.length === 0) {
+    e.preventDefault();
+    alert('Por favor, selecione ou digite ao menos um ativo.');
+    return;
+  }
+  
+  // Atualizar input com todos os tickers
+  tickersInput.value = todos.join(', ');
+});
+</script>
+
+<style>
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background-color: #1a2332;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.form-select option {
+  background-color: #1a2332;
+  color: #e0e0e0;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #8ab4f8;
+  box-shadow: 0 0 4px rgba(138, 180, 248, 0.3);
+}
+
+.info-box {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #1a2332;
+  border-left: 4px solid #8ab4f8;
+  border-radius: 4px;
+}
+
+.info-box h3 {
+  margin-top: 0;
+  color: #8ab4f8;
+}
+
+.info-box ul {
+  list-style-position: inside;
+  line-height: 1.6;
+}
+
+.info-box li {
+  margin-bottom: 8px;
+}
+
+small {
+  display: block;
+  margin-top: 4px;
+  color: #a0a0a0;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background-color: #8ab4f8;
+  color: #0b1220;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background-color: #a8c5ff;
+}
+</style>
 {% endblock %}
