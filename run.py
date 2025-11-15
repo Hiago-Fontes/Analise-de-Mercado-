@@ -24,12 +24,9 @@ app.secret_key = os.environ.get("APP_SECRET", "dev-secret-key")
 def inject_has_request_context():
     return dict(has_request_context=has_request_context)
 
-# Usar /tmp para Render (ou data/ localmente)
-if os.path.exists("/tmp"):
-    DATA_DIR = "/tmp"
-else:
-    DATA_DIR = os.path.join(PROJECT_ROOT, "data")
-    os.makedirs(DATA_DIR, exist_ok=True)
+# Sempre usar a pasta 'data' do projeto (nunca /tmp)
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+os.makedirs(DATA_DIR, exist_ok=True)
 
 DB_PATH = os.path.join(DATA_DIR, "market.sqlite")
 
