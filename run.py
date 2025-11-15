@@ -1,10 +1,10 @@
 import os
 import sys
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, has_request_context
 from datetime import datetime
 
 # Adiciona o diretório raiz do projeto ao path do Python
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, PROJECT_ROOT)
 
 from src.core.database.db import init_db, get_db
@@ -14,6 +14,11 @@ from src.core.analysis.report import generate_monthly_report
 
 app = Flask(__name__, template_folder=os.path.join(PROJECT_ROOT, "src/app/templates"), static_folder=os.path.join(PROJECT_ROOT, "src/app/static"))
 app.secret_key = os.environ.get("APP_SECRET", "dev-secret-key")
+
+# Injetar has_request_context no contexto do Jinja2
+@app.context_processor
+def inject_has_request_context():
+    return dict(has_request_context=has_request_context)
 
 DB_PATH = os.path.join(PROJECT_ROOT, "data", "market.sqlite")
 
