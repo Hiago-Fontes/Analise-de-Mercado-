@@ -16,12 +16,8 @@ try:
 except Exception:
     yf = None
 
-# DATA_DIR pode ser /tmp no Render ou data/ localmente
-if os.path.exists("/tmp"):
-    DATA_DIR = "/tmp"
-else:
-    DATA_DIR = os.path.join(PROJECT_ROOT, "data")
-    
+# DATA_DIR é sempre a pasta 'data' do projeto, não /tmp
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 SAMPLE_TICKERS = ["SPY", "AAPL", "VNQ"]
@@ -84,47 +80,99 @@ def ensure_seed_data(db_path: str):
     conn.close()
 
 
-def fetch_prices_online(tickers, period="1y") -> pd.DataFrame:
+def fetch_prices_online(ticker: str, period="1y") -> pd.DataFrame:
+    """Busca preço de UM ticker apenas"""
     if yf is None:
         raise RuntimeError("yfinance não disponível")
-    data = yf.download(tickers, period=period, auto_adjust=True, progress=False)
-    if isinstance(data, pd.DataFrame) and "Close" in data.columns:
-        close = data["Close"].copy()
-    else:
-        close = data.copy()
-    close.index = close.index.strftime("%Y-%m-%d")
-    frames = []
-    for t in tickers:
-        s = close[t] if t in close.columns else close.squeeze()
-        frames.append(pd.DataFrame({
-            "ticker": t,
-            "date": close.index,
-            "close": s.values,
-            "dividend": 0.0
-        }))
-    return pd.concat(frames)
+    
+    try:
+        # Usa Ticker object em vez de download para maior robustez
+        t = yf.Ticker(ticker)
+        data = t.history(period=period)
+    except Exception as e:
+        raise RuntimeError(f"Erro ao buscar {ticker}: {e}")
+    
+    if data.empty:
+        raise RuntimeError(f"Sem dados para {ticker}")
+    
+    # Usa a coluna 'Close'
+    if 'Close' not in data.columns:
+        raise RuntimeError(f"Sem coluna 'Close' para {ticker}")
+    
+    close = data['Close'].copy()
+    
+    # Formata datas (remove timezone se houver)
+    close.index = pd.to_datetime(close.index).strftime("%Y-%m-%d")
+    
+    df = pd.DataFrame({
+        "ticker": ticker,
+        "date": close.index,
+        "close": close.values,
+        "dividend": 0.0
+    })
+    
+    return df
 
 
 def ingest_latest(db_path: str, tickers: list[str]):
     """Busca preços e grava no banco. Fallback: usa CSV de amostra."""
     conn = get_db(db_path)
     cur = conn.cursor()
-    try:
-        df = fetch_prices_online(tickers)
-    except Exception:
-        # Fallback — tenta usar arquivo de amostra e filtrar os tickers
+    
+    # Tenta buscar cada ticker online
+    dfs_fetched = []
+    tickers_failed = []
+    
+    for ticker in tickers:
+        try:
+            print(f"Buscando {ticker} online...")
+            df = fetch_prices_online(ticker, period="1y")
+            dfs_fetched.append(df)
+            print(f"OK - {ticker} buscado com {len(df)} registros")
+        except Exception as e:
+            print(f"Erro ao buscar {ticker}: {e}")
+            tickers_failed.append(ticker)
+    
+    # Para tickers que falharam, tenta preencher com dados de amostra
+    if tickers_failed:
+        print(f"Preenchendo com amostra: {tickers_failed}")
         csv_path = os.path.join(DATA_DIR, "sample_prices.csv")
-        df_all = _read_csv_safe(csv_path)
-        if df_all.empty:
-            raise RuntimeError("Sem dados online e sem amostras locais.")
-        df = df_all[df_all["ticker"].isin(tickers)].copy()
-        if df.empty:
-            df = df_all.copy()  # usa tudo
-    # Grava
+        if os.path.exists(csv_path):
+            df_sample = pd.read_csv(csv_path)
+            for ticker in tickers_failed:
+                df_ticker = df_sample[df_sample["ticker"] == ticker].copy()
+                if not df_ticker.empty:
+                    dfs_fetched.append(df_ticker)
+                    print(f"Usando amostra para {ticker} ({len(df_ticker)} registros)")
+                else:
+                    print(f"Sem amostra para {ticker}, ignorando")
+        else:
+            print(f"Arquivo de amostra não encontrado: {csv_path}")
+    
+    # Se ainda não tem dados, usa amostra de tudo
+    if not dfs_fetched:
+        print("Nenhum ticker buscado com sucesso, usando amostra completa")
+        csv_path = os.path.join(DATA_DIR, "sample_prices.csv")
+        if os.path.exists(csv_path):
+            df_sample = pd.read_csv(csv_path)
+            dfs_fetched.append(df_sample)
+            print(f"Usando amostra completa ({len(df_sample)} registros)")
+        else:
+            raise RuntimeError(f"Sem dados: arquivo de amostra não encontrado em {csv_path}")
+    
+    if not dfs_fetched:
+        raise RuntimeError("Sem dados disponíveis para análise")
+    
+    # Concatena todos os dados
+    df = pd.concat(dfs_fetched, ignore_index=True)
+    print(f"Dados consolidados: {len(df)} registros")
+    
+    # Grava no banco
     cur.executemany(
         "INSERT OR REPLACE INTO prices(ticker, date, close, dividend) VALUES(?,?,?,?)",
         df[["ticker", "date", "close", "dividend"]].values.tolist()
     )
+    
     # Garante assets
     tickers_set = sorted(set(df["ticker"]))
     for t in tickers_set:
@@ -132,5 +180,7 @@ def ingest_latest(db_path: str, tickers: list[str]):
             "INSERT OR IGNORE INTO assets(ticker, name, class) VALUES(?,?,?)",
             (t, t, "EQUITY")
         )
+    
     conn.commit()
     conn.close()
+    print(f"Ingestão completa: {len(tickers_set)} ativos com dados")
